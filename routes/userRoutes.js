@@ -49,7 +49,7 @@ router.post("/login", async (req, res) => {
     const user = rows[0];
 
     // Vérifier le mot de passe
-    const isPasswordValid = passe == user.mot_de_passe_util;
+    const isPasswordValid = await bcrypt.compare(passe, user.mot_de_passe_util);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Mot de passe incorrect." });
     }
