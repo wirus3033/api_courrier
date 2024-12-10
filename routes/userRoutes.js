@@ -119,6 +119,84 @@ router.post("/register", authenticateToken, async (req, res) => {
   }
 });
 
+router.get("/me", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const [rows] = await db
+      .promise()
+      .query("SELECT * FROM utilisateur WHERE id_utilisateur = ?", [userId]);
+    res.status(200).json(rows);
+  } catch (error) {
+    console.log(error);
+    console.error("Erreur lors de la récupération des utilisateurs :", error);
+    res
+      .status(500)
+      .json({ error: "Erreur lors de la récupération des utilisateurs" });
+  }
+});
+
+router.put("/me", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { nom_util, prenom_util } = req.body;
+
+    // Update the user details
+    await db
+      .promise()
+      .query(
+        "UPDATE utilisateur SET nom_util = ?, prenom_util = ? WHERE id_utilisateur = ?",
+        [nom_util, prenom_util, userId]
+      );
+
+    // Fetch the updated user details
+    const [rows] = await db
+      .promise()
+      .query("SELECT * FROM utilisateur WHERE id_utilisateur = ?", [userId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Utilisateur non trouvé" });
+    }
+
+    res.status(200).json(rows[0]);
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour de l'utilisateur :", error);
+    res
+      .status(500)
+      .json({ error: "Erreur lors de la mise à jour de l'utilisateur" });
+  }
+});
+
+// Route pour changer le mot de passe
+router.put("/me/password", authenticateToken, async (req, res) => {
+  const userId = req.user.id; // Extract user ID from JWT token
+  const { newPassword } = req.body;
+
+  try {
+    // Validate the new password (example: minimum 8 characters)
+    if (newPassword.length < 8) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "Le nouveau mot de passe doit comporter au moins 8 caractères.",
+        });
+    }
+
+    // Hash the new password
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the password in the database directly
+    const updateQuery =
+      "UPDATE utilisateur SET mot_de_passe_util = ? WHERE id_utilisateur = ?";
+    await db.promise().query(updateQuery, [hashedNewPassword, userId]);
+
+    res.status(200).json({ message: "Mot de passe changé avec succès." });
+  } catch (err) {
+    console.error("Erreur lors du changement de mot de passe :", err);
+    res.status(500).json({ message: "Erreur du serveur." });
+  }
+});
+
 // Route pour récupérer les directions
 router.get("/directions", async (req, res) => {
   try {
