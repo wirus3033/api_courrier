@@ -23,9 +23,10 @@ const authenticateToken = (req, res, next) => {
 
 router.get("/users", async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM users");
+    const [rows] = await db.promise().query("SELECT * FROM utilisateur");
     res.status(200).json(rows);
   } catch (error) {
+    console.log(error);
     console.error("Erreur lors de la récupération des utilisateurs :", error);
     res
       .status(500)
