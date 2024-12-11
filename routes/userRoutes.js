@@ -174,12 +174,10 @@ router.put("/me/password", authenticateToken, async (req, res) => {
   try {
     // Validate the new password (example: minimum 8 characters)
     if (newPassword.length < 8) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Le nouveau mot de passe doit comporter au moins 8 caractères.",
-        });
+      return res.status(400).json({
+        message:
+          "Le nouveau mot de passe doit comporter au moins 8 caractères.",
+      });
     }
 
     // Hash the new password

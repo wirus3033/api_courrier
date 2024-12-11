@@ -3,42 +3,77 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
 
-// Obtenir tous les courriers
-router.get('/', (req, res) => {
-    db.query("SELECT * FROM courriers", (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json(results);
-    });
+// Route pour récupérer tous les courriers
+router.get('/courriers', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM courrier');
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur lors de la récupération des courriers.' });
+  }
 });
 
-// Créer un nouveau courrier
-router.post('/', (req, res) => {
-    const { title, content, sender, receiver, date_sent, user_id } = req.body;
-    const query = "INSERT INTO courriers (title, content, sender, receiver, date_sent, user_id) VALUES (?, ?, ?, ?, ?, ?)";
-    db.query(query, [title, content, sender, receiver, date_sent, user_id], (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: 'Courrier créé', id: results.insertId });
-    });
+// Route pour ajouter un nouveau courrier
+router.post('/courriers', async (req, res) => {
+  const { date_arrivee, date_pre_reference, pre_reference, origin, reference, objet, classement, status, utilisateur, modifier_par } = req.body;
+  try {
+    const [result] = await db.query(
+      'INSERT INTO courrier (date_arrivee, date_pre_reference, pre_reference, origin, reference, objet, classement, status, utilisateur, modifier_par) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [date_arrivee, date_pre_reference, pre_reference, origin, reference, objet, classement, status, utilisateur, modifier_par]
+    );
+    res.json({ id: result.insertId, message: 'Courrier ajouté avec succès.' });
+  } catch (err) {
+    console.error(err);
+    // res.status(500).json({ error: 'Erreur lors de l'ajout du courrier.' }); 
+  }
 });
 
-// Mettre à jour un courrier
-router.put('/:id', (req, res) => {
-    const { id } = req.params;
-    const { title, content, status } = req.body;
-    const query = "UPDATE courriers SET title = ?, content = ?, status = ? WHERE id = ?";
-    db.query(query, [title, content, status, id], (err) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: 'Courrier mis à jour' });
-    });
+
+// Route pour récupérer les courriers entrants
+router.get('/courriers/entrants', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM entrant INNER JOIN courrier ON entrant.id_courrier = courrier.id_courrier');
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur lors de la récupération des courriers entrants.' });
+  }
 });
 
-// Supprimer un courrier
-router.delete('/:id', (req, res) => {
-    const { id } = req.params;
-    db.query("DELETE FROM courriers WHERE id = ?", [id], (err) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ message: 'Courrier supprimé' });
-    });
+// Route pour ajouter un courrier entrant
+router.post('/courriers/entrants', async (req, res) => {
+  const { id_courrier, date_courrier } = req.body;
+  try {
+    const [result] = await db.query('INSERT INTO entrant (id_courrier, date_courrier) VALUES (?, ?)', [id_courrier, date_courrier]);
+    res.json({ id: result.insertId, message: 'Courrier entrant ajouté avec succès.' });
+  } catch (err) {
+    console.error(err);
+    // res.status(500).json({ error: 'Erreur lors de l'ajout du courrier entrant.' });
+  }
+});
+
+// Route pour récupérer les courriers sortants
+router.get('/courriers/sortants', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM sortant INNER JOIN courrier ON sortant.id_courrier = courrier.id_courrier');
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erreur lors de la récupération des courriers sortants.' });
+  }
+});
+
+// Route pour ajouter un courrier sortant
+router.post('/courriers/sortants', async (req, res) => {
+  const { id_courrier, destinataire } = req.body;
+  try {
+    const [result] = await db.query('INSERT INTO sortant (id_courrier, destinataire) VALUES (?, ?)', [id_courrier, destinataire]);
+    res.json({ id: result.insertId, message: 'Courrier sortant ajouté avec succès.' });
+  } catch (err) {
+    console.error(err);
+    // res.status(500).json({ error: 'Erreur lors de l'ajout du courrier sortant.' });
+  }
 });
 
 module.exports = router;
