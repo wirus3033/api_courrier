@@ -21,13 +21,19 @@ const courrierRoutes = require('./routes/courrierRoutes');
 // const userRoutes = require('./routes/userRoutes');
 const directionRoutes = require('./routes/directionRoures'); 
 const authRoutes = require('./routes/userRoutes');
+const entrant = require('./routes/courrierEntrant');
+const sortant = require('./routes/courrierSortant');
 
 
 app.use('/api', authRoutes);
 // Utilisation des routes
-app.use('/api/courriers', courrierRoutes);
+// app.use('/api/courriers', courrierRoutes);
 // app.use('/api/', userRoutes);
 app.use('/api/directions', directionRoutes);
+app.use('/api/entrant', entrant);
+app.use('/api/sortant', sortant);
+
+
 
 // Lancement du serveur
 const PORT = process.env.PORT || 4000;
