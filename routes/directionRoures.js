@@ -50,6 +50,16 @@ router.post('/', (req, res) => {
   });
 });
 
+router.get('/count', async (req, res) => {
+    try {
+      const [rows] = await db.promise().query('SELECT COUNT(*) as count FROM direction');
+      res.json({ count: rows[0].count });
+    } catch (error) {
+      console.error('Error getting direction count:', error);
+      res.status(500).json({ message: 'Error fetching direction count' });
+    }
+  });
+
 // Route : Mettre à jour une direction
 router.put('/:id', (req, res) => {
   const { nom_direction } = req.body;

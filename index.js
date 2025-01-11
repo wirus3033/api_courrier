@@ -9,10 +9,27 @@ const app = express();
 
 // Configuration de CORS
 app.use(cors({
-  origin: 'http://localhost:3000', // Autoriser les requêtes venant de votre frontend React
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes HTTP autorisées
-  allowedHeaders: ['Content-Type', 'Authorization'] // En-têtes autorisés
+  origin: 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+
+
+app.use((req, res, next) => {
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
+  );
+  next();
+});
+
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
 
 app.use(express.json());
 
