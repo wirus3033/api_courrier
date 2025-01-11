@@ -34,6 +34,20 @@ router.get("/users", async (req, res) => {
   }
 });
 
+
+router.get("/users", async (req, res) => {
+  try {
+    const [rows] = await db.promise().query("SELECT * FROM utilisateur");
+    res.status(200).json(rows);
+  } catch (error) {
+    console.log(error);
+    console.error("Erreur lors de la récupération des utilisateurs :", error);
+    res
+      .status(500)
+      .json({ error: "Erreur lors de la récupération des utilisateurs" });
+  }
+});
+
 // Route pour la connexion
 router.post("/login", async (req, res) => {
   const { pseudo, passe } = req.body;

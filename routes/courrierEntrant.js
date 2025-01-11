@@ -15,6 +15,16 @@ router.post('/', (req, res) => {
     });
 });
 
+router.get('/count', async (req, res) => {
+        try {
+          const [rows] = await db.promise().query('SELECT COUNT(*) as count FROM courrier_entrant');
+          res.json({ count: rows[0].count });
+        } catch (error) {
+          console.error('Error getting courrier count:', error);
+          res.status(500).json({ message: 'Error fetching courrier count' });
+        }
+      });
+
 // READ - Obtenir tous les courriers entrants
 router.get('/', (req, res) => {
     const query = 'SELECT * FROM courrier_entrant';
