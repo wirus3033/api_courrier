@@ -209,6 +209,29 @@ router.put("/me/password", authenticateToken, async (req, res) => {
   }
 });
 
+// Count total users
+router.get("/users/count/total", async (req, res) => {
+  try {
+    const [rows] = await db.promise().query("SELECT COUNT(id_utilisateur) as total FROM utilisateur");
+    res.status(200).json({ total: rows[0].total });
+  } catch (error) {
+    console.error("Error counting users:", error);
+    res.status(500).json({ error: "Error counting users" });
+  }
+});
+
+router.get("/users/count/by-access", authenticateToken, async (req, res) => {
+  try {
+    const [rows] = await db
+      .promise()
+      .query("SELECT acces_util, COUNT(*) as count FROM utilisateur GROUP BY acces_util");
+    res.status(200).json(rows);
+  } catch (error) {
+    console.error("Error counting users by access level:", error);
+    res.status(500).json({ error: "Error counting users by access level" });
+  }
+});
+
 // Route pour récupérer les directions
 router.get("/directions", async (req, res) => {
   try {
