@@ -50,15 +50,18 @@ router.post('/', (req, res) => {
   });
 });
 
-router.get('/count', async (req, res) => {
-    try {
-      const [rows] = await db.promise().query('SELECT COUNT(*) as count FROM direction');
-      res.json({ count: rows[0].count });
-    } catch (error) {
-      console.error('Error getting direction count:', error);
-      res.status(500).json({ message: 'Error fetching direction count' });
+router.get('/count/total', (req, res) => {
+  const query = 'SELECT COUNT(*) as total FROM direction';
+  
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Error counting directions' });
+    } else {
+      res.status(200).json({ total: results[0].total });
     }
   });
+});
 
 // Route : Mettre à jour une direction
 router.put('/:id', (req, res) => {
